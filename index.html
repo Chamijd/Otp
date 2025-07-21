@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SMS OTP Verification Demo</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 2rem;
+      max-width: 420px;
+      margin: 2rem auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      letter-spacing: 1px;
+      animation: fadeInDown 1s ease forwards;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      margin: 0.6rem 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 1.1rem;
+      box-sizing: border-box;
+    }
+
+    input {
+      outline: none;
+      border: 2px solid transparent;
+      transition: border-color 0.3s ease;
+    }
+
+    input:focus {
+      border-color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    button {
+      background: #fff;
+      color: #764ba2;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(255, 255, 255, 0.4);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #f0e7ff;
+    }
+
+    .message {
+      margin: 1.5rem 0 0 0;
+      font-weight: 600;
+      text-align: center;
+      min-height: 1.5em;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    #dashboard {
+      display: none;
+      margin-top: 2rem;
+      background: rgba(255,255,255,0.15);
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+    }
+
+    #dashboard h3 {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    #dashboard button {
+      width: auto;
+      padding: 0.6rem 1.4rem;
+      margin: 0.5rem 0.5rem 0 0;
+      background: #764ba2;
+      color: white;
+      box-shadow: none;
+    }
+
+    #dashboard button:hover {
+      background: #5a367a;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      0% {opacity: 0; transform: translateY(-20px);}
+      100% {opacity: 1; transform: translateY(0);}
+    }
+
+    @keyframes fadeIn {
+      0% {opacity: 0;}
+      100% {opacity: 1;}
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📲 SMS OTP Verification Demo</h2>
+
+  <div id="send-otp-section">
+    <input type="text" id="phone" placeholder="Enter phone number (e.g. +94771234567)" />
+    <button onclick="sendOtp()">Send OTP</button>
+  </div>
+
+  <div id="verify-otp-section" style="display:none;">
+    <input type="text" id="otp" placeholder="Enter OTP" />
+    <button onclick="verifyOtp()">Verify OTP</button>
+  </div>
+
+  <div class="message" id="message"></div>
+
+  <div id="dashboard">
+    <h3>🎉 Welcome to Dashboard!</h3>
+    <button onclick="alert('You clicked: Pair')">🔗 Pair</button>
+    <button onclick="alert('You clicked: QR')">📷 QR</button>
+    <button onclick="alert('You clicked: GitHub')">🌟 GitHub</button>
+    <button onclick="alert('You clicked: Owner')">👤 Owner</button>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+
+  <script>
+    async function sendOtp() {
+      const phone = document.getElementById('phone').value.trim();
+      if (!phone) {
+        alert('Please enter a phone number');
+        return;
+      }
+
+      document.getElementById('message').textContent = 'Sending OTP...';
+
+      const res = await fetch('/send-otp', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ phone })
+      });
+
+      const data = await res.json();
+      document.getElementById('message').textContent = data.message;
+
+      if (data.success) {
+        document.getElementById('send-otp-section').style.display = 'none';
+        document.getElementById('verify-otp-section').style.display = 'block';
+      }
+    }
+
+    async function verifyOtp() {
+      const phone = document.getElementById('phone').value.trim();
+      const otp = document.getElementById('otp').value.trim();
+
+      if (!otp) {
+        alert('Please enter the OTP');
+        return;
+      }
+
+      document.getElementById('message').textContent = 'Verifying OTP...';
+
+      const res = await fetch('/verify-otp', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ phone, otp })
+      });
+
+      const data = await res.json();
+      document.getElementById('message').textContent = data.message;
+
+      if (data.success) {
+        document.getElementById('verify-otp-section').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+      }
+    }
+
+    function logout() {
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('send-otp-section').style.display = 'block';
+      document.getElementById('message').textContent = '';
+      document.getElementById('phone').value = '';
+      document.getElementById('otp').value = '';
+    }
+  </script>
+
+</body>
+</html>
